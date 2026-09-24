@@ -4,14 +4,17 @@ The project separates analytical logic from the Streamlit presentation layer.
 
 ## Pipeline
 
-1. **Ingestion** — read CSV.
-2. **Validation** — check required fields and normalize aliases.
-3. **Cleaning** — text, dates, IDs, and numeric values.
-4. **EDA** — monthly revenue, category revenue, segment revenue, branch summaries.
-5. **RFM** — customer Recency, Frequency, Monetary features.
-6. **Churn labeling** — historical cutoff plus future 180-day observation window.
-7. **Modeling** — StandardScaler + Logistic Regression.
-8. **Presentation** — Streamlit dashboard.
-9. **Quality** — pytest and Ruff through GitHub Actions.
+1. Ingestion — read the supplied customer CSV.
+2. Validation — check the 19-column schema.
+3. Cleaning — normalize text and numeric fields.
+4. EDA — category, location, season, frequency and demographic analysis.
+5. Customer engagement — purchase interval, previous purchases and purchase value.
+6. Risk heuristic — classify purchase-interval-based engagement risk.
+7. Presentation — Streamlit dashboard.
+8. Quality — pytest and Ruff through GitHub Actions.
 
-The separation allows the same analytical functions to be tested and reused outside the dashboard.
+## Modeling boundary
+
+The supplied dataset has no purchase dates or repeated transactions per customer. Classical date-based RFM and leakage-safe 180-day churn are therefore not claimed for this dataset.
+
+The generic Logistic Regression implementation remains reusable for a future longitudinal dataset.
