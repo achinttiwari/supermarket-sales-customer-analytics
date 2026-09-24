@@ -1,36 +1,43 @@
 # Dashboard
 
-Run:
-
-```bash
-streamlit run app.py
-```
+Run streamlit run app.py.
 
 ## Controls
 
 - CSV upload.
-- Branch filter when Branch exists.
-- Customer Type filter.
-- Date range filter.
+- Category filter.
+- Location filter.
+- Gender filter.
 
 ## KPIs
 
 - Total Revenue.
-- Total Orders.
-- Average Order Value.
-- Average Rating when Rating exists.
+- Customer Count.
+- Average Purchase Value.
+- Average Rating.
+- Subscription Rate.
 
 ## Visuals
 
-- Monthly revenue trend.
-- Revenue by Product Category.
-- Customer segment revenue mix.
-- Branch revenue or Rating vs Sales depending on available fields.
+- Revenue by Category.
+- Revenue by Location.
+- Revenue by Season.
+- Revenue by Purchase Frequency.
+- Revenue by Gender.
+- Previous Purchases vs Purchase Value.
+
+## Customer analysis
+
+The dashboard displays a customer engagement-risk table using purchase_frequency_days:
+
+- Low: under 30 days.
+- Medium: 30–179 days.
+- High: 180 days or more.
+
+This is a heuristic engagement indicator and not a supervised churn probability.
 
 ## Export
 
-The dashboard provides an RFM CSV download.
+The customer metrics table can be downloaded as CSV.
 
-## Data flow
-
-The dashboard always passes uploaded/default data through the same cleaning function before calculating KPIs or charts. This keeps interactive analysis consistent with the documented cleaning rules.
+Uploaded data always passes through the same cleaning function before analysis.
