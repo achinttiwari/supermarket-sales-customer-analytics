@@ -1,15 +1,23 @@
 # Exploratory Data Analysis
 
-The dashboard implements the principal EDA views described by the project specification:
+The dashboard is aligned to the actual supplied columns.
 
-- Monthly revenue trend.
-- Revenue by Product_Category.
-- Member vs Normal revenue.
-- Branch distribution when Branch is present.
-- Rating vs Sales when Rating is present.
+## Analysis views
 
-The source framework is:
+- Revenue by product category.
+- Revenue by location.
+- Revenue by season.
+- Revenue by purchase frequency.
+- Revenue by gender.
+- Previous purchases versus current purchase value.
+- Subscription rate.
+- Discount-applied rate.
+- Review-rating distribution and average.
 
-**Observation → Insight → Hypothesis → Recommendation**
+## Interpretation framework
 
-Recommendations should be generated from observed dataset results rather than hard-coded assumptions.
+Use:
+
+Observation → Insight → Hypothesis → Recommendation
+
+The repository distinguishes descriptive findings from causal claims. The supplied snapshot supports cross-sectional comparisons, not temporal or causal conclusions.
