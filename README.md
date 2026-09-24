@@ -93,6 +93,19 @@ The dashboard provides:
 
 See `docs/EXECUTIVE_PRESENTATION.md` for the presentation outline and download the generated PPTX from the project workspace.
 
+## Validation
+
+The supplied CSV has been validated locally against the project pipeline:
+
+- 500 source rows and 17 source columns
+- 500 unique customers after cleaning
+- 19 columns after adding two derived features
+- 0 missing values after cleaning
+- 4 automated tests passing
+- Cleaning output reproduced at `data/processed/cleaned_customer_shopping_behavior.csv`
+
+The raw CSV is intentionally kept as a local input rather than committed automatically. Place the supplied file at `data/raw/customer_shopping_behavior.csv` before running the pipeline.
+
 ## Status
 
 **Complete for the supplied cross-sectional dataset.** True RFM and supervised 180-day churn remain future extensions that require longitudinal transaction data.
