@@ -7,5 +7,4 @@ htmlcov/
 *.py[cod]
 .DS_Store
 .env
-data/raw/*.csv
 data/processed/*.csv
