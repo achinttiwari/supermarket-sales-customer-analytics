@@ -1,13 +1,33 @@
 import pandas as pd
-from src.data_cleaning import clean_transactions
 
-def test_clean_transactions():
-    raw = pd.DataFrame({
-        "Invoice_ID": ["I1"], "Order_Date": ["2026-01-01"], "Customer_ID": [None],
-        "Customer_Type": [" Member "], "Gender": ["F"], "Product_Line": [" Food "],
-        "Unit_Price": ["₹ 100.50"], "Quantity": ["2"], "Total_Sales": ["₹ 201.00"],
-    })
-    result = clean_transactions(raw)
-    assert result.loc[0, "Customer_ID"] == "C000"
-    assert result.loc[0, "Product_Category"] == "Food"
-    assert result.loc[0, "Unit_Price"] == 100.50
+from src.data_cleaning import clean_customer_shopping_data
+
+
+def test_clean_customer_shopping_data():
+    raw = pd.DataFrame(
+        {
+            "customer_id": [1],
+            "age": [25],
+            "gender": [" Female "],
+            "item_purchased": [" Jacket "],
+            "category": [" Outerwear "],
+            "purchase_amount": ["₹ 100.50"],
+            "location": [" Delhi "],
+            "size": ["M"],
+            "color": ["Blue"],
+            "season": ["Winter"],
+            "review_rating": [4.2],
+            "subscription_status": [1],
+            "shipping_type": ["Express"],
+            "discount_applied": [0],
+            "previous_purchases": [8],
+            "payment_method": ["Cash"],
+            "frequency_of_purchases": ["Weekly"],
+            "age_group": ["18-25"],
+            "purchase_frequency_days": [7],
+        }
+    )
+    result = clean_customer_shopping_data(raw)
+    assert len(result) == 1
+    assert result.loc[0, "gender"] == "Female"
+    assert result.loc[0, "purchase_amount"] == 100.50
