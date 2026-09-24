@@ -1,31 +1,45 @@
 # RFM & Churn
 
-## Dataset limitation
+## Why classical RFM is not computed
 
-The supplied CSV is a customer-level snapshot with one row per customer and no purchase date.
+Classical RFM needs transaction dates and repeated customer activity to calculate:
 
-A valid classical RFM/churn implementation cannot manufacture last transaction date, repeated invoice history, historical monetary aggregation, or future 180-day activity labels.
+- Recency: time since last transaction
+- Frequency: transaction count over a defined period
+- Monetary: monetary value over a defined period
+
+The supplied dataset has one row per customer and no transaction date, so these quantities cannot be reconstructed without inventing information.
 
 ## Implemented alternative
 
-The project exposes snapshot customer metrics:
+The dashboard uses:
 
-- Purchase_Interval_Days from purchase_frequency_days
-- Previous_Purchases from previous_purchases
-- Purchase_Value from purchase_amount
-- subscription_status
-- review_rating
+- Purchase interval from `frequency_of_purchases`
+- Previous purchases
+- Current purchase value
+- Subscription status
+- Review rating
 
-Engagement risk is assigned as:
+A transparent engagement-risk heuristic is applied:
 
 | Purchase interval | Risk |
 |---:|---|
-| < 30 days | Low |
+| <30 days | Low |
 | 30–179 days | Medium |
-| ≥ 180 days | High |
+| ≥180 days | High |
 
-This is engagement risk, not churn probability.
+This is **not** a churn probability and should not be presented as a trained classifier.
 
-## Future extension
+## Reusable model
 
-A longitudinal transaction dataset with dates can restore historical cutoff logic, true RFM features, 180-day churn labels, Logistic Regression, and probability-based risk tiers. The reusable model remains in src/churn_model.py.
+`src/churn_model.py` contains a leakage-safe Logistic Regression pipeline for a future longitudinal dataset with `Recency`, `Frequency`, `Monetary`, and a valid future `Churn_Status` label.
+
+## Required future data
+
+To implement the guide's 180-day churn model, collect transaction-level records containing at least:
+
+- Customer ID
+- Transaction date
+- Transaction value
+
+Then define a historical cutoff and generate the future inactivity label without leakage.
