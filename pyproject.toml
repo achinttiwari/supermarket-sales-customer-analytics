@@ -5,3 +5,4 @@ exclude = [".venv", ".git"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
