@@ -1,25 +1,33 @@
 # Project Specification
 
-This repository implements the supplied IBM Bob IDE & AI Data Analytics Internship Guide.
+## Objective
+
+Implement the supplied IBM Bob IDE & AI Data Analytics Internship Guide against the actual customer shopping CSV provided for this project.
 
 ## Scope
 
-1. Environment setup with IBM Bob IDE and Python.
-2. Data acquisition and data dictionary.
-3. Data cleaning.
-4. Exploratory data analysis.
-5. RFM customer analysis and churn prediction.
-6. Streamlit dashboard.
-7. Final analytical deliverables.
+1. Load and validate the supplied customer shopping dataset.
+2. Clean and standardize the data.
+3. Perform descriptive EDA and business segmentation.
+4. Build a Streamlit dashboard.
+5. Provide customer engagement analysis.
+6. Preserve a reusable architecture for future RFM/churn modeling.
+7. Produce reproducible documentation and an executive presentation.
 
-## Outputs
+## Dataset-specific adaptation
 
-- Cleaned transaction data.
-- Data dictionary.
-- EDA charts and business insights.
-- RFM customer table.
-- Leakage-safe Logistic Regression churn model.
-- Churn-risk tiers.
-- Interactive dashboard.
+The supplied raw CSV contains 17 fields. The pipeline derives `age_group` from age and `purchase_frequency_days` from the categorical frequency field.
 
-The actual CSV is not included in the supplied guide, so this repository does not fabricate transaction records or pretend to reproduce the guide's reference metrics.
+The source guide's date-based RFM and 180-day churn specification cannot be reproduced from this snapshot without inventing transaction dates or future observations. The implementation explicitly documents that boundary rather than fabricating model performance.
+
+## Deliverables
+
+- Raw supplied CSV as project input
+- Reproducible cleaned CSV
+- Data dictionary
+- EDA documentation
+- Streamlit dashboard
+- Engagement-risk customer table
+- Reusable leakage-safe Logistic Regression module
+- Automated tests and CI
+- Executive presentation
