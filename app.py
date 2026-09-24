@@ -1,83 +1,136 @@
-"""Streamlit dashboard for supermarket sales analytics."""
+"""Streamlit dashboard for the supplied customer shopping behavior dataset."""
 
 from __future__ import annotations
 
 import io
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.data_cleaning import clean_transactions
-from src.eda import branch_summary, kpis, monthly_revenue, revenue_by_category, revenue_by_customer_type
-from src.rfm import build_rfm
+from src.data_cleaning import clean_customer_shopping_data
+from src.eda import (
+    kpis,
+    purchase_frequency_summary,
+    revenue_by_category,
+    revenue_by_gender,
+    revenue_by_location,
+    revenue_by_season,
+)
+from src.rfm import build_snapshot_customer_metrics
 
-st.set_page_config(page_title="Supermarket Analytics", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Customer Shopping Analytics", page_icon="📊", layout="wide")
 st.title("Supermarket Sales & Customer Analytics")
-st.caption("Cleaning → EDA → RFM → churn-ready customer intelligence")
+st.caption("Customer behavior, product performance, purchasing frequency, subscription and discount analysis")
 
-uploaded = st.sidebar.file_uploader("Upload supermarket CSV", type=["csv"])
+uploaded = st.sidebar.file_uploader("Upload customer shopping CSV", type=["csv"])
+default_path = "data/raw/customer_shopping_behavior_cleaned.csv"
+
 try:
-    raw = pd.read_csv(uploaded) if uploaded is not None else pd.read_csv("data/raw/supermarket_sales.csv")
+    raw = pd.read_csv(uploaded) if uploaded is not None else pd.read_csv(default_path)
 except FileNotFoundError:
-    st.info("Add data/raw/supermarket_sales.csv or upload a compatible CSV to begin.")
+    st.info("Place customer_shopping_behavior_cleaned.csv in data/raw/ or upload it from the sidebar.")
     st.stop()
 
 try:
-    df = clean_transactions(raw)
+    df = clean_customer_shopping_data(raw)
 except ValueError as exc:
     st.error(str(exc))
     st.stop()
 
 st.sidebar.header("Filters")
-if "Branch" in df.columns:
-    options = sorted(df["Branch"].dropna().unique().tolist())
-    selected = st.sidebar.multiselect("Branch", options, default=options)
-    df = df[df["Branch"].isin(selected)]
 
-customer_options = sorted(df["Customer_Type"].dropna().unique().tolist())
-selected_customers = st.sidebar.multiselect("Customer Type", customer_options, default=customer_options)
-df = df[df["Customer_Type"].isin(selected_customers)]
+category_options = sorted(df["category"].dropna().unique())
+categories = st.sidebar.multiselect("Category", category_options, default=category_options)
+df = df[df["category"].isin(categories)]
 
-min_date, max_date = df["Order_Date"].min().date(), df["Order_Date"].max().date()
-date_range = st.sidebar.date_input("Date Range", (min_date, max_date), min_value=min_date, max_value=max_date)
-if isinstance(date_range, tuple) and len(date_range) == 2:
-    df = df[df["Order_Date"].dt.date.between(date_range[0], date_range[1])]
+location_options = sorted(df["location"].dropna().unique())
+locations = st.sidebar.multiselect("Location", location_options, default=location_options)
+df = df[df["location"].isin(locations)]
+
+gender_options = sorted(df["gender"].dropna().unique())
+genders = st.sidebar.multiselect("Gender", gender_options, default=gender_options)
+df = df[df["gender"].isin(genders)]
 
 if df.empty:
     st.warning("No records match the selected filters.")
     st.stop()
 
 summary = kpis(df)
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Total Revenue", f"₹{summary['total_revenue']:,.2f}")
-c2.metric("Total Orders", f"{int(summary['total_orders']):,}")
-c3.metric("Average Order Value", f"₹{summary['average_order_value']:,.2f}")
-c4.metric("Average Rating", "N/A" if pd.isna(summary["average_rating"]) else f"{summary['average_rating']:.2f}")
+c2.metric("Customers", f"{int(summary['total_customers']):,}")
+c3.metric("Avg Purchase", f"₹{summary['average_purchase_value']:,.2f}")
+c4.metric("Avg Rating", f"{summary['average_rating']:.2f}")
+c5.metric("Subscription Rate", f"{summary['subscription_rate']:.1%}")
 
 left, right = st.columns(2)
 with left:
-    monthly = monthly_revenue(df)
-    st.plotly_chart(px.line(monthly, x="Month", y="Revenue", markers=True, title="Monthly Revenue Trend"), use_container_width=True)
-with right:
     category = revenue_by_category(df)
-    st.plotly_chart(px.bar(category, x="Product_Category", y="Total_Sales", title="Revenue by Product Category"), use_container_width=True)
+    st.plotly_chart(
+        px.bar(category, x="category", y="Revenue", title="Revenue by Category"),
+        use_container_width=True,
+    )
+with right:
+    location = revenue_by_location(df)
+    st.plotly_chart(
+        px.bar(location, x="location", y="Revenue", title="Revenue by Location"),
+        use_container_width=True,
+    )
 
 left, right = st.columns(2)
 with left:
-    customer_mix = revenue_by_customer_type(df)
-    st.plotly_chart(px.pie(customer_mix, names="Customer_Type", values="Total_Sales", title="Revenue by Customer Type"), use_container_width=True)
+    season = revenue_by_season(df)
+    st.plotly_chart(
+        px.bar(season, x="season", y="Revenue", title="Revenue by Season"),
+        use_container_width=True,
+    )
 with right:
-    if "Branch" in df.columns:
-        branches = branch_summary(df)
-        st.plotly_chart(px.bar(branches, x="Branch", y="Total_Sales", title="Revenue by Branch"), use_container_width=True)
-    elif "Rating" in df.columns:
-        st.plotly_chart(px.scatter(df, x="Rating", y="Total_Sales", title="Rating vs Sales"), use_container_width=True)
-    else:
-        st.info("Add Branch or Rating to enable the fourth analysis chart.")
+    frequency = purchase_frequency_summary(df)
+    st.plotly_chart(
+        px.bar(
+            frequency,
+            x="frequency_of_purchases",
+            y="Revenue",
+            title="Revenue by Purchase Frequency",
+        ),
+        use_container_width=True,
+    )
 
-st.subheader("Customer RFM")
-rfm = build_rfm(df)
-st.dataframe(rfm, use_container_width=True, hide_index=True)
+left, right = st.columns(2)
+with left:
+    gender = revenue_by_gender(df)
+    st.plotly_chart(
+        px.pie(gender, names="gender", values="Revenue", title="Revenue by Gender"),
+        use_container_width=True,
+    )
+with right:
+    st.plotly_chart(
+        px.scatter(
+            df,
+            x="previous_purchases",
+            y="purchase_amount",
+            size="review_rating",
+            color="subscription_status",
+            hover_data=["customer_id", "category", "frequency_of_purchases"],
+            title="Previous Purchases vs Purchase Value",
+        ),
+        use_container_width=True,
+    )
+
+st.subheader("Customer Engagement Risk")
+st.caption(
+    "This is a transparent heuristic based on purchase interval: <30 days = Low, "
+    "30–179 days = Medium, ≥180 days = High. It is not a supervised churn prediction."
+)
+metrics = build_snapshot_customer_metrics(df)
+st.dataframe(metrics, use_container_width=True, hide_index=True)
+
 buffer = io.StringIO()
-rfm.to_csv(buffer, index=False)
-st.download_button("Download RFM CSV", data=buffer.getvalue(), file_name="rfm_customers.csv", mime="text/csv")
+metrics.to_csv(buffer, index=False)
+st.download_button(
+    "Download Customer Metrics CSV",
+    data=buffer.getvalue(),
+    file_name="customer_engagement_metrics.csv",
+    mime="text/csv",
+)
