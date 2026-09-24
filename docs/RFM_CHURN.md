@@ -1,29 +1,31 @@
 # RFM & Churn
 
-## RFM
+## Dataset limitation
 
-For each Customer_ID:
+The supplied CSV is a customer-level snapshot with one row per customer and no purchase date.
 
-- **Recency** — days since the latest historical order.
-- **Frequency** — number of distinct invoices.
-- **Monetary** — total historical revenue.
+A valid classical RFM/churn implementation cannot manufacture last transaction date, repeated invoice history, historical monetary aggregation, or future 180-day activity labels.
 
-## Churn
+## Implemented alternative
 
-The source specification defines churn as inactivity for 180+ days.
+The project exposes snapshot customer metrics:
 
-The implementation creates a leakage-safe supervised dataset:
+- Purchase_Interval_Days from purchase_frequency_days
+- Previous_Purchases from previous_purchases
+- Purchase_Value from purchase_amount
+- subscription_status
+- review_rating
 
-1. Choose a historical cutoff.
-2. Compute RFM features using transactions on or before that cutoff.
-3. Look only at the following 180 days to create the churn label.
-4. Split the labeled customer table 80/20 with stratification.
-5. Train Logistic Regression using scaled RFM features.
+Engagement risk is assigned as:
 
-## Risk tiers
+| Purchase interval | Risk |
+|---:|---|
+| < 30 days | Low |
+| 30–179 days | Medium |
+| ≥ 180 days | High |
 
-- Low: probability < 40%
-- Medium: 40% to < 70%
-- High: >= 70%
+This is engagement risk, not churn probability.
 
-The supplied guide reports reference metrics around 70.89% accuracy, 65% precision, and 84.21% recall. Those are treated as reference values rather than guaranteed results.
+## Future extension
+
+A longitudinal transaction dataset with dates can restore historical cutoff logic, true RFM features, 180-day churn labels, Logistic Regression, and probability-based risk tiers. The reusable model remains in src/churn_model.py.
