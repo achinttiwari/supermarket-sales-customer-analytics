@@ -1,60 +1,98 @@
 # Supermarket Sales & Customer Analytics
 
-End-to-end customer shopping analytics using the supplied 500-row customer shopping behavior CSV, Python, Plotly, and Streamlit.
+A reproducible customer-shopping analytics project built from the supplied CSV, with a Python cleaning/analysis pipeline and Streamlit dashboard.
 
-## Dataset used
+## Dataset
 
-The supplied file contains 500 customers and 19 fields. It is a customer-level snapshot: each customer_id is unique and there is no transaction date or multi-period transaction history.
+The raw file supplied for this project contains **500 customer records and 17 columns**. Two fields are derived by the cleaning pipeline:
 
-Core fields include customer demographics, product behavior, purchase value, location, season, ratings, subscriptions, discounts, payment method and purchase-frequency behavior.
+- `age_group`
+- `purchase_frequency_days`
 
-### Dataset snapshot
+The snapshot has one unique `customer_id` per row. It contains no purchase date and no repeated transaction history.
 
-| Metric | Value |
-|---|---:|
-| Customers | 500 |
-| Total purchase value | ₹83,676.81 |
-| Average purchase value | ₹167.35 |
-| Average review rating | 2.93 |
-| Subscription rate | 49.0% |
-| Discount-applied rate | 47.4% |
+### Data quality
 
-## Modeling decision
+- 500 rows
+- 500 unique customers
+- 26 missing `review_rating` values; the pipeline fills these with the median
+- No missing values remain after cleaning
+- Purchase value total: **₹83,676.81**
+- Average purchase value: **₹167.35**
+- Average rating: **2.93**
+- Subscription rate: **49.0%**
+- Discount-applied rate: **47.4%**
 
-The original project guide describes date-based RFM and a leakage-safe 180-day churn model. This supplied CSV does not contain purchase dates or repeated transactions per customer, so classical Recency and supervised 180-day churn cannot be calculated without inventing information.
+## Key findings
 
-The repository therefore uses a transparent Customer Engagement Risk heuristic:
+- Accessories generated ₹21,765.50 in purchase value.
+- California generated ₹18,194.14 in purchase value.
+- Spring generated ₹22,704.40 in purchase value.
+- Weekly and annual purchasing each contain 139 customers.
+- The snapshot contains 263 customers in the <30-day engagement bucket, 98 in 30–179 days, and 139 at ≥180 days.
 
-- Low: purchase interval < 30 days
-- Medium: 30–179 days
-- High: ≥ 180 days
+These are descriptive observations from this dataset, not causal conclusions.
 
-This is a behavioral risk indicator, not a trained churn prediction model.
+## Modeling boundary
 
-The generic Logistic Regression module remains available for a future longitudinal transaction dataset.
+The internship guide calls for date-based RFM and a leakage-safe 180-day churn model. This dataset cannot support either honestly because it has no transaction dates or future activity labels.
 
-## Quick start
+The project therefore implements a transparent engagement-risk proxy:
 
-Clone the repository, place customer_shopping_behavior_cleaned.csv in data/raw/, install requirements, run scripts/clean_data.py, then run streamlit run app.py.
+- **Low:** purchase interval <30 days
+- **Medium:** 30–179 days
+- **High:** ≥180 days
 
-Tests: pytest
-Lint: ruff check .
+The reusable Logistic Regression implementation remains in `src/churn_model.py` for a future longitudinal dataset.
+
+## Project structure
+
+```
+.
+├── app.py
+├── data/
+│   ├── raw/
+│   └── processed/
+├── docs/
+├── scripts/
+├── src/
+└── tests/
+```
+
+## Run locally
+
+```bash
+python -m pip install -r requirements.txt
+python -m scripts.clean_data
+pytest
+ruff check .
+streamlit run app.py
+```
+
+The dashboard loads `data/raw/customer_shopping_behavior.csv` by default and also supports CSV upload.
 
 ## Dashboard
 
-The Streamlit app provides total revenue, customer count, average purchase value, average rating, subscription rate, revenue by category/location/season/frequency/gender, previous-purchases vs purchase-value analysis, customer engagement risk, CSV export, and upload support.
+The dashboard provides:
+
+- KPI cards
+- Category, location and gender filters
+- Revenue by category, location, season, purchase frequency and gender
+- Previous-purchases vs purchase-value visualization
+- Customer engagement-risk table
+- CSV export
+
+## Deliverables
+
+- Reproducible cleaning pipeline
+- EDA modules
+- Streamlit dashboard
+- Automated tests and CI configuration
+- Dataset documentation and analysis report
+- Executive presentation deck
+
+See `docs/EXECUTIVE_PRESENTATION.md` for the presentation outline and download the generated PPTX from the project workspace.
 
 ## Status
 
-| Component | Status |
-|---|---|
-| Supplied CSV schema integration | Complete |
-| Cleaning | Complete |
-| EDA | Complete |
-| Customer engagement analysis | Complete |
-| Streamlit dashboard | Complete |
-| Tests | Complete |
-| CI | Configured |
-| Classical time-based RFM | Not applicable to snapshot |
-| 180-day supervised churn | Requires longitudinal transaction data |
-| Executive presentation | Pending |
+**Complete for the supplied cross-sectional dataset.** True RFM and supervised 180-day churn remain future extensions that require longitudinal transaction data.
