@@ -2,24 +2,27 @@
 
 ## Input
 
-The supplied customer shopping behavior CSV is a 500-row, 19-column customer-level snapshot.
+`data/raw/customer_shopping_behavior.csv` is the supplied 500-row, 17-column customer-level snapshot.
 
-## Cleaning
+## Transformations
 
-The implementation:
+1. Normalize column names.
+2. Strip whitespace from text values.
+3. Parse numeric fields, including currency-formatted purchase values.
+4. Remove rows missing `customer_id` or `purchase_amount`.
+5. Fill missing binary flags with zero.
+6. Fill missing previous-purchase counts with zero.
+7. Fill missing review ratings with the median.
+8. Derive `purchase_frequency_days` using Weekly=7, Fortnightly=14, Monthly=30, Annually=365.
+9. Derive `age_group` from age.
+10. Remove duplicate customer IDs.
 
-1. Normalizes column names.
-2. Strips whitespace from text fields.
-3. Converts numeric fields to numeric types.
-4. Removes rows missing customer_id or purchase_amount.
-5. Fills missing binary flags with zero.
-6. Fills missing purchase-frequency intervals with the column median.
-7. Removes duplicate customer_id records.
-
-The supplied file currently has no missing values, so the imputation paths are defensive rather than observed corrections.
+The supplied file has 26 missing review ratings; no other missing values are present.
 
 ## Output
 
-scripts/clean_data.py writes a cleaned copy to data/processed/cleaned_customer_shopping_behavior.csv.
+`python -m scripts.clean_data` writes:
 
-The raw CSV is treated as a local input and is not fabricated into the repository.
+`data/processed/cleaned_customer_shopping_behavior.csv`
+
+The cleaned artifact contains 19 columns and 500 rows.
