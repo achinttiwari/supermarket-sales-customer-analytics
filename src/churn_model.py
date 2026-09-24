@@ -21,7 +21,9 @@ class ChurnResult:
     predictions: pd.DataFrame
 
 
-def train_churn_model(rfm_labeled: pd.DataFrame, random_state: int = 42) -> ChurnResult:
+def train_churn_model(
+    rfm_labeled: pd.DataFrame, random_state: int = 42
+) -> ChurnResult:
     required = {"Recency", "Frequency", "Monetary", "Churn_Status", "Customer_ID"}
     missing = required - set(rfm_labeled.columns)
     if missing:
@@ -29,17 +31,22 @@ def train_churn_model(rfm_labeled: pd.DataFrame, random_state: int = 42) -> Chur
 
     X = rfm_labeled[["Recency", "Frequency", "Monetary"]]
     y = rfm_labeled["Churn_Status"].astype(int)
-
     if y.nunique() < 2:
         raise ValueError("Churn training requires both churn classes.")
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.20, random_state=random_state, stratify=y
+        X,
+        y,
+        test_size=0.20,
+        random_state=random_state,
+        stratify=y,
     )
-    model = Pipeline([
-        ("scaler", StandardScaler()),
-        ("classifier", LogisticRegression(max_iter=1000, random_state=random_state)),
-    ])
+    model = Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            ("classifier", LogisticRegression(max_iter=1000, random_state=random_state)),
+        ]
+    )
     model.fit(X_train, y_train)
 
     probability = model.predict_proba(X_test)[:, 1]
