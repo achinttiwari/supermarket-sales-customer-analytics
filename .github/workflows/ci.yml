@@ -16,6 +16,8 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Clean supplied dataset
+        run: python -m scripts.clean_data
       - name: Lint
         run: ruff check .
       - name: Test
